@@ -44,8 +44,7 @@ namespace CloseAll
                 }
             }
 
-            string[] except = exceptList.ToArray(); // Holds process names
-
+            string[] except = exceptList.ToArray();
 
             Process[] runningProcesses = Process.GetProcesses();
             foreach (Process p in runningProcesses)
@@ -53,7 +52,12 @@ namespace CloseAll
                 if (!String.IsNullOrEmpty(p.MainWindowTitle)
                 && p.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle
                 || p.ProcessName == "explorer")
-                    p.Kill();
+                {
+                    bool allowed = true;
+                    foreach(string proc in except) if (proc == p.ProcessName) allowed = false;
+                    if (allowed) p.Kill();
+                }
+                    
             }
         }
     }
