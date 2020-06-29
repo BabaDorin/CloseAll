@@ -21,6 +21,8 @@ namespace CloseAll
 
         public bool GetFilters(string[] args)
         {
+            // Reads arguments from args and return true if everyting is ok.
+            // It there are invalid argument, it returns false.
 
             foreach (string arg in args)
             {
@@ -120,6 +122,10 @@ namespace CloseAll
 
         public bool IgnoreProcess(Process process)
         {
+            // It runs the process through some filters.
+            // Returns true if the process should be skipped
+            // Returns false if the process should be killed
+
             // The process is included in ExceptList
             foreach (string proc in ExceptList)
                 if (proc == process.ProcessName.ToLower())
@@ -154,7 +160,7 @@ namespace CloseAll
             // It is focused
             if (NoFocus)
             {
-                //stuff
+                //skr
             }
 
             // Process goes to GULAG
