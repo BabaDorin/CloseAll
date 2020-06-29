@@ -21,38 +21,96 @@ namespace CloseAll
 
         public bool GetFilters(string[] args)
         {
+
             foreach (string arg in args)
             {
-                if (arg[0] == '-')
+                switch (arg.ToLower())
                 {
-                    UnderException = false;
+                    case "-help":
+                        Console.WriteLine("\n------------------------ Commands ------------------------\n\n" +
+                            "COMMAND: closeall -except <app1> <app2> <app3> : Indicated processes won't get killed\n" +
+                            "  Example: closeall -except opera    : All the processes will get killed, except Opera\n" +
+                            "  Example: closeall -except discord devenv   : All the processes will get killed, except Discord and Visual Studio\n" +
+                            "\nCOMMAND: closeall -ignore-startup : Startup processes won't get killed\n" +
+                            "\n----------------------------------------------------------");
+                        return false;
 
-                    switch (arg.ToLower())
-                    {
-                        case "-except":
-                            UnderException = true;
-                            break;
-                        case "-nofocus":
-                            NoFocus = true;
-                            break;
-                        case "-ignore-startup":
-                            IgnoreStartup = true;
-                            break;
-                        default:
-                            Console.WriteLine("Unknown argument");
+                    case "-except":
+                        UnderException = true;
+                        break;
+
+                    case "-nofocus":
+                        NoFocus = true;
+                        break;
+
+                    case "-ignore-startup":
+                        IgnoreStartup = true;
+                        break;
+
+                    default:
+                        if (UnderException)
+                        {
+                            Except(arg.ToLower());
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nUnknown argument   ¯\\_('-')_/¯  ");
+                            Console.WriteLine("   Use closeall -help to get the list of commands.");
                             return false;
-                    }
-                }
-                else
-                {
-                    if (UnderException)
-                    {
-                        Except(arg.ToLower());
-                    }
+                        }
+                        break;
                 }
             }
 
             return true;
+
+            //
+            // Asta las aici na vseakii slucii
+            //
+            //foreach (string arg in args)
+            //{
+            //    if (arg[0] == '-')
+            //    {
+            //        UnderException = false;
+
+            //        switch (arg.ToLower())
+            //        {
+            //            case "-help":
+            //                Console.WriteLine("\n------------------------ Commands ------------------------\n\n" +
+            //                    "COMMAND: closeall -except <app1> <app2> <app3> : Indicated processes won't get killed\n" +
+            //                    "  Example: closeall -except opera    : All the processes will get killed, except Opera\n" +
+            //                    "  Example: closeall -except discord devenv   : All the processes will get killed, except Discord and Visual Studio\n" +
+            //                    "\nCOMMAND: closeall -ignore-startup : Startup processes won't get killed\n" +
+            //                    "\n----------------------------------------------------------");
+            //                return false;
+
+            //            case "-except":
+            //                UnderException = true;
+            //                break;
+
+            //            case "-nofocus":
+            //                NoFocus = true;
+            //                break;
+
+            //            case "-ignore-startup":
+            //                IgnoreStartup = true;
+            //                break;
+
+            //            default:
+            //                Console.WriteLine(@"Unknown argument   ¯\_('-')_/¯  ");
+            //                Console.WriteLine(@"   Use closeall -help to get the list of commands.");
+            //                return false;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (UnderException)
+            //        {
+            //            Except(arg.ToLower());
+            //        }
+            //    }
+            //}
+
         }
 
         public void Except(string processName)
@@ -64,7 +122,7 @@ namespace CloseAll
         {
             // The process is included in ExceptList
             foreach (string proc in ExceptList)
-                if (proc == process.ProcessName)
+                if (proc == process.ProcessName.ToLower())
                     return true;
 
             // It's a Startup process

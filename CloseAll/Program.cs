@@ -9,14 +9,15 @@ namespace CloseAll
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Press any key to continue");
-            Console.ReadKey();
+            //TODO: Whitelist feature => user will have the possibility to whitelist some processes.
+            // Save them in a file or smth
+            // Those processes won't get killed so he can run closeall without indicating the same
+            // apps in -except all the time.
 
             Filter filter = new Filter();
 
             if (filter.GetFilters(args))
             {
-                Console.WriteLine("TRUE");
                 Process[] runningProcesses = Process.GetProcesses();
                 foreach (Process p in runningProcesses)
                 {
@@ -26,17 +27,14 @@ namespace CloseAll
                     {
                         if (!filter.IgnoreProcess(p))
                         {
-                            //Console.WriteLine("Kill " + p.ProcessName);
-                            Console.WriteLine("Kill " + p);
-                            //p.Kill();
+                            Console.WriteLine("Kill " + p.ProcessName);
+                            p.Kill();
                         }
                     }
                 }
             }
             else
             {
-                Console.WriteLine("False");
-
                 return;
             }
         }
