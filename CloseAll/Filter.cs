@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Management;
 using System.Management.Instrumentation;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace CloseAll
 {
@@ -14,7 +15,6 @@ namespace CloseAll
     {
         List<string> StartupApps;
 
-        public bool NoFocus { get; set; }
         public bool IgnoreStartup { get; set; }
         public bool UnderException { get; set; }
         public List<string> ExceptList { get; set; }
@@ -42,7 +42,10 @@ namespace CloseAll
                         break;
 
                     case "-nofocus":
-                        NoFocus = true;
+                        Except(getFocusedProcess());
+
+                        //Nu functionează bine - nu închide applicații cu aceeași denumire ca și windowul focusat.
+                        //ar fi bine ca windowurile să se închidă după PID.
                         break;
 
                     case "-ignore-startup":
@@ -157,13 +160,9 @@ namespace CloseAll
                     return true;
             }
 
-            // It is focused
-            if (NoFocus)
-            {
-                //skr
-            }
 
-            // Process goes to GULAG
+
+            // Process goes to GULAG /rip/
             return false;
         }
 
@@ -187,5 +186,26 @@ namespace CloseAll
 
             return processName.Substring(0, endIndex);
         }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]//RVA
+        private static extern IntPtr GetForegroundWindow();
+
+        public string getFocusedProcess()
+        {
+            {
+                var aHandle = GetForegroundWindow();
+                Process[] processes = Process.GetProcesses();
+                foreach (Process clsProcess in processes)
+                {
+                    if (aHandle == clsProcess.MainWindowHandle)
+                    {
+                        string processName = clsProcess.ProcessName;
+                        return processName;
+                    }
+                }
+            }
+            return null; //Nu cred ca e posibil sa nu fie nici un focus ^^
+        }
+
     }
 }
