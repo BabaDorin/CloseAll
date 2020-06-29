@@ -8,57 +8,34 @@ namespace CloseAll
     {
         static void Main(string[] args)
         {
-            bool nofocus = false;
-            bool ignoreStartup = false;
-            bool underException = false;
-            List<string> exceptList = new List<string>();
-            
+            Filter filter = new Filter();
 
-            foreach (string arg in args)
-            {
-                if (arg[0] == '-')
-                {
-                    underException = false;
+            filter.GetFilters(args);
 
-                    switch (arg)
-                    {
-                        case "-except":
-                            underException = true;
-                            break;
-                        case "-nofocus":
-                            nofocus = true;
-                            break;
-                        case "-ignore-startup":
-                            ignoreStartup = true;
-                            break;
-                        default:
-                            Console.WriteLine("Unknown argument");
-                            break;
-                    }
-                } else 
-                {
-                    if (underException) {
-                        exceptList.Add(arg);
-                    } 
+            filter.IgnoreStartup = true;
+            Console.WriteLine("IgnoreStartup set to true");
 
-                }
-            }
+            filter.IgnoreProcess(Process.GetCurrentProcess());
 
-            string[] except = exceptList.ToArray();
+            //Process[] runningProcesses = Process.GetProcesses();
+            //foreach (Process p in runningProcesses)
+            //{
+            //    if (!String.IsNullOrEmpty(p.MainWindowTitle)
+            //    && p.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle
+            //    || p.ProcessName == "explorer")
+            //    {
+            //        if (!filter.IgnoreProcess(p)) p.Kill();
 
-            Process[] runningProcesses = Process.GetProcesses();
-            foreach (Process p in runningProcesses)
-            {
-                if (!String.IsNullOrEmpty(p.MainWindowTitle)
-                && p.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle
-                || p.ProcessName == "explorer")
-                {
-                    bool allowed = true;
-                    foreach(string proc in except) if (proc == p.ProcessName) allowed = false;
-                    if (allowed) p.Kill();
-                }
+
+
+            //        //bool allowed = true;
+            //        //foreach (string proc in filter.ExceptList) if (proc == p.ProcessName) allowed = false;
+            //        //if (allowed) p.Kill();
+
+            //        //Console.WriteLine(p.ProcessName);
+            //    }
                     
-            }
+            //}
         }
     }
 }
