@@ -6,19 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Management;
 using System.Management.Instrumentation;
+using System.IO;
 
 namespace CloseAll
 {
     class Filter
     {
-        ManagementObjectCollection StartupApps;
+        List<string> StartupApps;
 
         public bool NoFocus { get; set; }
         public bool IgnoreStartup { get; set; }
         public bool UnderException { get; set; }
         public List<string> ExceptList { get; set; }
 
-        public void GetFilters(string[] args)
+        public bool GetFilters(string[] args)
         {
             foreach (string arg in args)
             {
@@ -26,7 +27,7 @@ namespace CloseAll
                 {
                     UnderException = false;
 
-                    switch (arg)
+                    switch (arg.ToLower())
                     {
                         case "-except":
                             UnderException = true;
@@ -39,17 +40,19 @@ namespace CloseAll
                             break;
                         default:
                             Console.WriteLine("Unknown argument");
-                            break;
+                            return false;
                     }
                 }
                 else
                 {
                     if (UnderException)
                     {
-                        Except(arg);
+                        Except(arg.ToLower());
                     }
                 }
             }
+
+            return true;
         }
 
         public void Except(string processName)
@@ -67,20 +70,27 @@ namespace CloseAll
             // It's a Startup process
             if (IgnoreStartup)
             {
-                //get startup processes and store them
+                // ISSUE: Find a way to get only startup applications that are currently enabled.
+                // This way we get all startup apps, including disabled ones.
+
                 if(StartupApps == null || StartupApps.Count == 0)
                 {
                     // Get & store startup apps
                     ManagementClass mangnmt = new ManagementClass("Win32_StartupCommand");
-                    StartupApps = mangnmt.GetInstances();  
+                    ManagementObjectCollection startupApps = mangnmt.GetInstances();
+                    StartupApps = new List<string>();
+
+                    foreach (ManagementObject app in startupApps)
+                    {
+                        string processName = getProcessName(app["command"] as string);
+
+                        if (processName != null)
+                            StartupApps.Add(processName);
+                    }
                 }
 
-                foreach(ManagementObject app in StartupApps)
-                {
-                    // Check if the process passed as argument is within StartupApps
-                }
-
-                Console.ReadKey();
+                if (StartupApps.Contains(process.ProcessName.ToLower()))
+                    return true;
             }
 
             // It is focused
@@ -96,6 +106,22 @@ namespace CloseAll
         public Filter()
         {
             ExceptList = new List<string>();
+        }
+
+        private string getProcessName(string command)
+        {
+            int startIndex = command.LastIndexOf('\\');
+
+            if (startIndex <= 0)
+                return null;
+
+            string processName = command.Substring(++startIndex).ToLower();
+            int endIndex = processName.IndexOf(".exe");
+
+            if (endIndex <= 0)
+                return null;
+
+            return processName.Substring(0, endIndex);
         }
     }
 }
