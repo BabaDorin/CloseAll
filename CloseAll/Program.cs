@@ -8,7 +8,6 @@ namespace CloseAll
         static void Main(string[] args)
         {
             Process[] runningProcesses = Process.GetProcesses();
-
             foreach (Process p in runningProcesses)
             {
                 if (!String.IsNullOrEmpty(p.MainWindowTitle)
