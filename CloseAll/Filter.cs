@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Management;
-using System.Management.Instrumentation;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace CloseAll
@@ -15,6 +10,7 @@ namespace CloseAll
     {
         List<string> StartupApps;
 
+        public bool NoFocus { get; set; }
         public bool IgnoreStartup { get; set; }
         public bool UnderException { get; set; }
         public List<string> ExceptList { get; set; }
@@ -22,7 +18,7 @@ namespace CloseAll
         public bool GetFilters(string[] args)
         {
             // Reads arguments from args and return true if everyting is ok.
-            // It there are invalid argument, it returns false.
+            // It there are invalid arguments, it returns false.
 
             foreach (string arg in args)
             {
@@ -30,27 +26,31 @@ namespace CloseAll
                 {
                     case "-help":
                         Console.WriteLine("\n------------------------ Commands ------------------------\n\n" +
-                            "COMMAND: closeall -except <app1> <app2> <app3> : Indicated processes won't get killed\n" +
-                            "  Example: closeall -except opera    : All the processes will get killed, except Opera\n" +
-                            "  Example: closeall -except discord devenv   : All the processes will get killed, except Discord and Visual Studio\n" +
-                            "\nCOMMAND: closeall -ignore-startup : Startup processes won't get killed\n" +
+                            "Command: closeall -except <app1> <app2> <app3> : Indicated processes won't get killed\n" +
+                            "  ex: closeall -except opera    : All the processes will get killed, except Opera\n" +
+                            "  ex: closeall -except discord devenv   : All the processes will get killed, except Discord and Visual Studio\n" +
+                            "\nCommand: closeall -ignore-startup : Startup processes won't get killed\n" +
+                            "\nCommand: closeall -nofocus : Focused window won't get killed\n" +
+                            "\n\nAbbreviations:" +
+                            "\n  -except: -e" +
+                            "\n  -ignore-startup: -i-s" +
+                            "\n  -nofocus: -nf" +
                             "\n----------------------------------------------------------");
                         return false;
 
                     case "-except":
+                    case "-e":
                         UnderException = true;
                         break;
 
                     case "-nofocus":
-                        Except(getFocusedProcess());
-
-                        //Nu functionează bine - nu închide applicații cu aceeași denumire ca și windowul focusat.
-                        //ar fi bine ca windowurile să se închidă după PID.
-
+                    case "-nf":
+                        NoFocus = true;
                         UnderException = false; 
                         break;
 
                     case "-ignore-startup":
+                    case "-i-s":
                         IgnoreStartup = true;
 
                         UnderException = false; 
@@ -85,6 +85,13 @@ namespace CloseAll
             // Returns true if the process should be skipped
             // Returns false if the process should be killed
 
+            // The process is focused
+            if (NoFocus)
+            {
+                if (process.MainWindowHandle == getFocusedProcess())
+                    return true;
+            }
+
             // The process is included in ExceptList
             foreach (string proc in ExceptList)
                 if (proc == process.ProcessName.ToLower())
@@ -116,8 +123,6 @@ namespace CloseAll
                     return true;
             }
 
-
-
             // Process goes to GULAG /rip/
             return false;
         }
@@ -146,21 +151,23 @@ namespace CloseAll
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]//RVA
         private static extern IntPtr GetForegroundWindow();
 
-        public string getFocusedProcess()
+        public IntPtr getFocusedProcess()
         {
-            {
-                var aHandle = GetForegroundWindow();
-                Process[] processes = Process.GetProcesses();
-                foreach (Process clsProcess in processes)
-                {
-                    if (aHandle == clsProcess.MainWindowHandle)
-                    {
-                        string processName = clsProcess.ProcessName;
-                        return processName;
-                    }
-                }
-            }
-            return null; //Nu cred ca e posibil sa nu fie nici un focus ^^
+            return GetForegroundWindow();
+            
+            //{
+            //    var aHandle = GetForegroundWindow();
+
+            //    Process[] processes = Process.GetProcesses();
+            //    foreach (Process clsProcess in processes)
+            //    {
+            //        if (aHandle == clsProcess.MainWindowHandle)
+            //        {
+            //            return clsProcess.ProcessName;
+            //        }
+            //    }
+            //}
+            //return null; //Nu cred ca e posibil sa nu fie nici un focus ^^
         }
 
     }
