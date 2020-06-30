@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace CloseAll
 {
@@ -8,56 +9,34 @@ namespace CloseAll
     {
         static void Main(string[] args)
         {
-            bool nofocus = false;
-            bool ignoreStartup = false;
-            bool underException = false;
-            List<string> exceptList = new List<string>();
-            
+            //TODO: Whitelist feature => user will have the possibility to whitelist some processes.
+            // Save them in a file or smth
+            // Those processes won't get killed so he can run closeall without indicating the same
+            // apps in -except all the time.
 
-            foreach (string arg in args)
+            Filter filter = new Filter();
+
+            if (filter.GetFilters(args))
             {
-                if (arg[0] == '-')
+                Process[] runningProcesses = Process.GetProcesses();
+                foreach (Process p in runningProcesses)
                 {
-                    underException = false;
-
-                    switch (arg)
+                    if (!String.IsNullOrEmpty(p.MainWindowTitle)
+                    && p.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle
+                    || p.ProcessName == "explorer")
                     {
-                        case "-except":
-                            underException = true;
-                            break;
-                        case "-nofocus":
-                            nofocus = true;
-                            break;
-                        case "-ignore-startup":
-                            ignoreStartup = true;
-                            break;
-                        default:
-                            Console.WriteLine("Unknown argument");
-                            break;
+                        if (!filter.IgnoreProcess(p))
+                        {
+                            Console.WriteLine("Kill " + p.ProcessName);
+                            // p.Kill();
+                        }
                     }
-                } else 
-                {
-                    if (underException) {
-                        exceptList.Add(arg);
-                    } 
-
                 }
             }
-
-            string[] except = exceptList.ToArray();
-
-            Process[] runningProcesses = Process.GetProcesses();
-            foreach (Process p in runningProcesses)
+            else
             {
-                if (!String.IsNullOrEmpty(p.MainWindowTitle)
-                && p.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle
-                || p.ProcessName == "explorer")
-                {
-                    bool allowed = true;
-                    foreach(string proc in except) if (proc == p.ProcessName) allowed = false;
-                    if (allowed) p.Kill();
-                }
-                    
+                // Invalid args
+                return;
             }
         }
     }
