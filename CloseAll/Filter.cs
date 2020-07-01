@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 
@@ -10,10 +12,13 @@ namespace CloseAll
     {
         List<string> StartupApps;
 
+        public bool WriteWhiteList { get; set; }
         public bool NoFocus { get; set; }
         public bool IgnoreStartup { get; set; }
         public bool UnderException { get; set; }
+        public string WhiteListPath { get; set; } // by default => same dir as .exe
         public List<string> ExceptList { get; set; }
+        public List<string> WhiteList { get; set; }
 
         public bool GetFilters(string[] args)
         {
@@ -41,25 +46,73 @@ namespace CloseAll
                     case "-except":
                     case "-e":
                         UnderException = true;
+                        WriteWhiteList = false;
+                        break;
+
+                    case "-whitelist":
+                    case "-wl":
+                        WriteWhiteList = true;
+                        UnderException = false;
+                        break;
+
+                    case "-removefromwhitelist":
+                    case "-rfwl":
+                        //
+                        // remove one or more items via arg params
+                        //
+                        break;
+
+                    case "-dropwhitelist":
+                    case "-dwl":
+                        //
+                        // remove all items from whitelist
+                        //
+                        break;
+
+                    case "-checkwhitelist":
+                    case "-cwl":
+                        Console.WriteLine("Whitelisted processes:");
+                        foreach(string item in WhiteList)
+                        {
+                            Console.WriteLine(item);
+                        }
+                        Console.WriteLine();
+                        WriteWhiteList = false;
                         break;
 
                     case "-nofocus":
                     case "-nf":
                         NoFocus = true;
-                        UnderException = false; 
+                        UnderException = false;
+                        WriteWhiteList = false;
                         break;
 
                     case "-ignore-startup":
                     case "-i-s":
                         IgnoreStartup = true;
 
-                        UnderException = false; 
+                        UnderException = false;
+                        WriteWhiteList = false;
                         break;
 
                     default:
                         if (UnderException)
                         {
                             Except(arg.ToLower());
+                        }
+                        else if (WriteWhiteList)
+                        {
+                            if (WhiteList == null) WhiteList = new List<string>();
+
+                            string wlProcessName = arg.ToLower();
+                            if (WhitelistThis(wlProcessName))
+                            {
+                                Console.WriteLine(wlProcessName + " has been whitelisted");
+                            }
+                            else
+                            {
+                                Console.WriteLine(wlProcessName + " is already whitelisted");
+                            }
                         }
                         else
                         {
@@ -84,6 +137,10 @@ namespace CloseAll
             // It runs the process through some filters.
             // Returns true if the process should be skipped
             // Returns false if the process should be killed
+
+            // The process is included in whitelist
+            if (WhiteList != null && WhiteList.Contains(process.ProcessName.ToLower()))
+                return true;
 
             // The process is focused
             if (NoFocus)
@@ -130,6 +187,15 @@ namespace CloseAll
         public Filter()
         {
             ExceptList = new List<string>();
+            WhiteListPath = Directory.GetCurrentDirectory() + "/closeall_whitelist.txt";
+
+            if (File.Exists(WhiteListPath))
+            {
+                using (StreamReader sr = new StreamReader(WhiteListPath))
+                {
+                    WhiteList = sr.ReadToEnd().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+            }
         }
 
         private string getProcessName(string command)
@@ -154,20 +220,30 @@ namespace CloseAll
         public IntPtr getFocusedProcess()
         {
             return GetForegroundWindow();
-            
-            //{
-            //    var aHandle = GetForegroundWindow();
+        }
 
-            //    Process[] processes = Process.GetProcesses();
-            //    foreach (Process clsProcess in processes)
-            //    {
-            //        if (aHandle == clsProcess.MainWindowHandle)
-            //        {
-            //            return clsProcess.ProcessName;
-            //        }
-            //    }
-            //}
-            //return null; //Nu cred ca e posibil sa nu fie nici un focus ^^
+        public bool WhitelistThis(string processName)
+        {
+            // returns false if the process is already whitelisted
+            if (WhiteList.Contains(processName))
+                return false;
+
+            WhiteList.Add(processName);
+
+            SyncWhitelist();
+            return true;
+        }
+
+        public void SyncWhitelist()
+        {
+            // Writes whitelist file
+            using (StreamWriter sw = new StreamWriter(WhiteListPath))
+            {
+                foreach(string item in WhiteList)
+                {
+                    sw.WriteLine(item);
+                }
+            }
         }
 
     }
