@@ -13,6 +13,8 @@ namespace CloseAll
         List<string> StartupApps;
 
         public bool WriteWhiteList { get; set; }
+        public bool RemoveFromWhiteList { get; set; }
+        public bool DropWhiteList { get; set; }
         public bool NoFocus { get; set; }
         public bool IgnoreStartup { get; set; }
         public bool UnderException { get; set; }
@@ -20,7 +22,7 @@ namespace CloseAll
         public List<string> ExceptList { get; set; }
         public List<string> WhiteList { get; set; }
 
-        public bool GetFilters(string[] args)
+        public bool getFilters(string[] args)
         {
             // Reads arguments from args and return true if everyting is ok.
             // It there are invalid arguments, it returns false.
@@ -47,37 +49,45 @@ namespace CloseAll
                     case "-e":
                         UnderException = true;
                         WriteWhiteList = false;
+                        RemoveFromWhiteList = false;
                         break;
 
                     case "-whitelist":
                     case "-wl":
                         WriteWhiteList = true;
                         UnderException = false;
+                        RemoveFromWhiteList = false;
                         break;
 
                     case "-removefromwhitelist":
                     case "-rfwl":
-                        //
-                        // remove one or more items via arg params
-                        //
+                        // removes one or more items via arg params
+                        RemoveFromWhiteList = true;
+                        UnderException = false;
+                        WriteWhiteList = false;
                         break;
 
                     case "-dropwhitelist":
                     case "-dwl":
-                        //
-                        // remove all items from whitelist
-                        //
+                        // removes all items from whitelist
+                        dropWhiteList();
+                        RemoveFromWhiteList = false;
+                        UnderException = false;
+                        WriteWhiteList = false;
                         break;
 
                     case "-checkwhitelist":
                     case "-cwl":
-                        Console.WriteLine("Whitelisted processes:");
-                        foreach(string item in WhiteList)
+                        // displays whitelisted processes
+                        Console.WriteLine("\nWhitelisted processes:");
+                        foreach (string item in WhiteList)
                         {
-                            Console.WriteLine(item);
+                            Console.WriteLine("  " + item);
                         }
                         Console.WriteLine();
+                        RemoveFromWhiteList = false;
                         WriteWhiteList = false;
+                        RemoveFromWhiteList = false;
                         break;
 
                     case "-nofocus":
@@ -85,35 +95,46 @@ namespace CloseAll
                         NoFocus = true;
                         UnderException = false;
                         WriteWhiteList = false;
+                        RemoveFromWhiteList = false;
                         break;
 
                     case "-ignore-startup":
                     case "-i-s":
                         IgnoreStartup = true;
-
                         UnderException = false;
                         WriteWhiteList = false;
+                        RemoveFromWhiteList = false;
                         break;
 
                     default:
                         if (UnderException)
                         {
-                            Except(arg.ToLower());
+                            except(arg.ToLower());
                         }
+
                         else if (WriteWhiteList)
                         {
-                            if (WhiteList == null) WhiteList = new List<string>();
-
                             string wlProcessName = arg.ToLower();
-                            if (WhitelistThis(wlProcessName))
-                            {
+                            if (whitelistThis(wlProcessName))
                                 Console.WriteLine(wlProcessName + " has been whitelisted");
-                            }
+                            else
+                                Console.WriteLine(wlProcessName + " is already whitelisted");
+                        }
+
+                        else if (RemoveFromWhiteList)
+                        {
+                            if (!File.Exists(WhiteListPath))
+                                Console.WriteLine("There is no whitelist.");
                             else
                             {
-                                Console.WriteLine(wlProcessName + " is already whitelisted");
+                                string wlProcessName = arg.ToLower();
+                                if (!removeFromWhiteList(wlProcessName))
+                                    Console.WriteLine(wlProcessName + " is not whitelisted.");
+                                else
+                                    Console.WriteLine(wlProcessName + " has been removed from your whitelist");
                             }
                         }
+
                         else
                         {
                             Console.WriteLine("\nUnknown argument   ¯\\_('-')_/¯  ");
@@ -123,16 +144,15 @@ namespace CloseAll
                         break;
                 }
             }
-
             return true;
         }
 
-        public void Except(string processName)
+        public void except(string processName)
         {
             ExceptList.Add(processName);
         }
 
-        public bool IgnoreProcess(Process process)
+        public bool ignoreProcess(Process process)
         {
             // It runs the process through some filters.
             // Returns true if the process should be skipped
@@ -160,7 +180,7 @@ namespace CloseAll
                 // ISSUE: Find a way to get only startup applications that are currently enabled.
                 // This way we get all startup apps, including disabled ones.
 
-                if(StartupApps == null || StartupApps.Count == 0)
+                if (StartupApps == null || StartupApps.Count == 0)
                 {
                     // Get & store startup apps
                     ManagementClass mangnmt = new ManagementClass("Win32_StartupCommand");
@@ -189,13 +209,12 @@ namespace CloseAll
             ExceptList = new List<string>();
             WhiteListPath = Directory.GetCurrentDirectory() + "/closeall_whitelist.txt";
 
+            // read whitelist from file
             if (File.Exists(WhiteListPath))
-            {
                 using (StreamReader sr = new StreamReader(WhiteListPath))
-                {
                     WhiteList = sr.ReadToEnd().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
-            }
+            else
+                WhiteList = new List<string>();
         }
 
         private string getProcessName(string command)
@@ -222,7 +241,7 @@ namespace CloseAll
             return GetForegroundWindow();
         }
 
-        public bool WhitelistThis(string processName)
+        public bool whitelistThis(string processName)
         {
             // returns false if the process is already whitelisted
             if (WhiteList.Contains(processName))
@@ -230,16 +249,47 @@ namespace CloseAll
 
             WhiteList.Add(processName);
 
-            SyncWhitelist();
+            syncWhitelist();
             return true;
         }
 
-        public void SyncWhitelist()
+        public bool removeFromWhiteList(string processName)
+        {
+            // false => item is not whitelisted
+            // true => item has been un-whitelisted
+
+            if (!WhiteList.Contains(processName))
+                return false;
+
+            WhiteList.RemoveAll(p => p == processName);
+
+            syncWhitelist();
+            return true;
+        }
+
+        public void dropWhiteList()
+        {
+            try
+            {
+                WhiteList.Clear();
+
+                if (File.Exists(WhiteListPath))
+                    File.Delete(WhiteListPath);
+
+                Console.WriteLine("your whitelist has been dropped.");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error: Something unexpected happened. The whitelist has not been dropped.");
+            }
+        }
+
+        public void syncWhitelist()
         {
             // Writes whitelist file
             using (StreamWriter sw = new StreamWriter(WhiteListPath))
             {
-                foreach(string item in WhiteList)
+                foreach (string item in WhiteList)
                 {
                     sw.WriteLine(item);
                 }

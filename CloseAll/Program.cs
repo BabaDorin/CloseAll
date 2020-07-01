@@ -14,8 +14,10 @@ namespace CloseAll
 
             Filter filter = new Filter();
 
-            if (filter.GetFilters(args))
+            if (filter.getFilters(args))
             {
+                Console.WriteLine();
+
                 Process[] runningProcesses = Process.GetProcesses();
                 foreach (Process p in runningProcesses)
                 {
@@ -23,7 +25,7 @@ namespace CloseAll
                     && p.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle
                     || p.ProcessName == "explorer")
                     {
-                        if (!filter.IgnoreProcess(p))
+                        if (!filter.ignoreProcess(p))
                         {
                             Console.WriteLine("Kill " + p.ProcessName);
                             // p.Kill();
