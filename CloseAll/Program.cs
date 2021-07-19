@@ -28,7 +28,7 @@ namespace CloseAll
                         if (!filter.ignoreProcess(p))
                         {
                             Console.WriteLine("Kill " + p.ProcessName);
-                            // p.Kill();
+                            p.Kill();
                         }
                     }
                 }
