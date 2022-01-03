@@ -1,37 +1,29 @@
 ﻿using CloseAll.Contracts;
-using System.Diagnostics;
 
 namespace CloseAll.Services
 {
     internal class ProcessCleaner : IProcessCleaner
     {
         private readonly IFilter filter;
+        private readonly IProcessManager processManager;
 
-        public ProcessCleaner(IFilter filter)
+        public ProcessCleaner(IFilter filter, IProcessManager processManager)
         {
             this.filter = filter;
+            this.processManager = processManager;
         }
 
         public void Start()
         {
-            GetRunningProcesses().ForEach(proc =>
+            var processes = processManager.GetRunningProcesses();
+
+            processes.ForEach(proc =>
             {
                 if (filter.IsEligibleForTermination(proc))
                 {
-                    KillProcess(proc);
+                    processManager.KillProcess(proc);
                 }
             });
-        }
-
-        private List<Process> GetRunningProcesses()
-        {
-            throw new Exception();
-        }
-
-        private void KillProcess(Process proc)
-        {
-            Console.WriteLine(proc.ProcessName);
-            // proc.Kill();
         }
     }
 }
