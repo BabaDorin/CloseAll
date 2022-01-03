@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Management;
 using System.Runtime.InteropServices;
 
-namespace CloseAll
+namespace CloseAll.Models
 {
     class Filter
     {

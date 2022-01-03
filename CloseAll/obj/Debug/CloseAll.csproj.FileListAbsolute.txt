@@ -1,7 +1,0 @@
-C:\Users\Dorin\CloseAll\CloseAll\bin\Debug\CloseAll.exe.config
-C:\Users\Dorin\CloseAll\CloseAll\bin\Debug\CloseAll.exe
-C:\Users\Dorin\CloseAll\CloseAll\bin\Debug\CloseAll.pdb
-C:\Users\Dorin\CloseAll\CloseAll\obj\Debug\CloseAll.csprojAssemblyReference.cache
-C:\Users\Dorin\CloseAll\CloseAll\obj\Debug\CloseAll.csproj.CoreCompileInputs.cache
-C:\Users\Dorin\CloseAll\CloseAll\obj\Debug\CloseAll.exe
-C:\Users\Dorin\CloseAll\CloseAll\obj\Debug\CloseAll.pdb
