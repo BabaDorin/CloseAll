@@ -14,7 +14,7 @@ namespace CloseAll.Services
 
         public bool IsEligibleForTermination(Process process)
         {
-            throw new NotImplementedException();
+            return rules.Any(r => r.IsEligible(process));
         }
     }
 }
