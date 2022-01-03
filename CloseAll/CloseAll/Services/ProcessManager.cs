@@ -5,9 +5,14 @@ namespace CloseAll.Services
 {
     internal class ProcessManager : IProcessManager
     {
-        public List<Process> GetRunningProcesses()
+        public IEnumerable<Process> GetRunningProcesses()
         {
             throw new Exception();
+        }
+        
+        public IEnumerable<string> GetStartupProcessesNames()
+        {
+            throw new NotImplementedException();
         }
 
         public void KillProcess(Process proc)

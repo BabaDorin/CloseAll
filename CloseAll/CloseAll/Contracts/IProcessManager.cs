@@ -4,7 +4,10 @@ namespace CloseAll.Contracts
 {
     internal interface IProcessManager
     {
-        List<Process> GetRunningProcesses();
+        IEnumerable<Process> GetRunningProcesses();
+
+        IEnumerable<string> GetStartupProcessesNames();
+        
         void KillProcess(Process proc);
     }
 }
