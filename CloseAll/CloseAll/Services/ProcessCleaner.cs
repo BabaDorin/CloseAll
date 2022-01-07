@@ -15,7 +15,8 @@ namespace CloseAll.Services
 
         public void Start()
         {
-            var processes = processManager.GetRunningProcesses();
+            var processes = processManager.GetRunningProcesses()
+                .ToList();
 
             processes.ForEach(proc =>
             {
