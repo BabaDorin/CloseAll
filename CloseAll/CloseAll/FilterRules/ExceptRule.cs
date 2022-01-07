@@ -5,6 +5,7 @@ namespace CloseAll.FilterRules
 {
     /// <summary>
     /// The process won't be terminated if it's name is within the exceptions list.
+    /// The exceptions are passed via cmd arguments
     /// </summary>
     internal class ExceptRule : IRule
     {
