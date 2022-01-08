@@ -35,8 +35,7 @@ namespace CloseAll.Services
 
         public void KillProcess(Process proc)
         {
-            Console.WriteLine($"Kill {proc.ProcessName}");
-            // proc.Kill();
+            proc.Kill();
         }
     }
 }

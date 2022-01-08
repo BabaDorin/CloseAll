@@ -2,6 +2,6 @@
 {
     internal interface IProcessCleaner
     {
-        public void Start();
+        public void Start(bool simulate);
     }
 }

@@ -11,7 +11,7 @@ namespace CloseAll.Services
 
             using var sr = new StreamReader(path);
 
-            return sr.ReadToEnd().Replace(@"\r", "");
+            return sr.ReadToEnd();
         }
 
         public void Append(string path, string content)
