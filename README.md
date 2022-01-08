@@ -1,7 +1,7 @@
 # CloseAll
 CloseAll is a small command-line utility that allows you to close all Windows applications.
 
-**To use it from cmd, move add the utility to PATH.**
+**To use it from cmd, add the utility to PATH.**
 
 > This utility can work on all versions of Windows operating system: Windows 9x/ME, Windows NT, Windows 2000, Windows XP, Windows Server 2003, Windows Vista, Windows Server 2008, Windows 7, Windows 8, and Windows 10.
 
