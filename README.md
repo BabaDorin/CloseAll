@@ -12,7 +12,7 @@ CloseAll is a small command-line utility that allows you to close all Windows ap
 * Window closing
 * Exception list
 * Whitelist applications in a .txt file 
-  * Path: `Documents/closeall_whitelist.txt. If the file isn't there, feel free to create it manually and make sure to not misspell the name. Each whitelisted process name has to be written from new line, and it is case insensitive)
+  * Path: `Documents/closeall_whitelist.txt`. If the file isn't there, feel free to create it manually and make sure to not misspell the name. Each whitelisted process name has to be written from new line, and it is case insensitive)
 * [TODO] Ignore startup applications
 
 ## Arguments
