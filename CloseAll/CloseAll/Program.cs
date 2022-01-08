@@ -8,6 +8,8 @@ class Program
         var filterBuilder = new FilterBuilder();
 
         var runCleaner = true;
+        var simulateCleaning = false;
+
         var currentOperation = ArgsOperation.None;
 
         foreach(var arg in args)
@@ -27,6 +29,17 @@ class Program
                         "\n  -nofocus: -nf" +
                         "\n----------------------------------------------------------");
                     runCleaner = false;
+                    break;
+
+                case "-list":
+                case "-ls":
+                    ListRunningProcesses();
+                    runCleaner = false;
+                    break;
+
+                case "-simulate":
+                case "-sim":
+                    simulateCleaning = true;
                     break;
 
                 case "-except":
@@ -69,8 +82,15 @@ class Program
             .Build();
 
         new ProcessCleaner(filter, processManager)
-            .Start();
+            .Start(simulateCleaning);
+    }
 
-        Console.ReadKey();
+    private static void ListRunningProcesses()
+    {
+        new ProcessManager().GetRunningProcesses()
+            .ToList()
+            .ForEach(p => Console.WriteLine(p.ProcessName));
+
+        Console.WriteLine();
     }
 }

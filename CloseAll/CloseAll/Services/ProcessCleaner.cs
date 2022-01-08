@@ -13,7 +13,7 @@ namespace CloseAll.Services
             this.processManager = processManager;
         }
 
-        public void Start()
+        public void Start(bool simulate = false)
         {
             var processes = processManager.GetRunningProcesses()
                 .ToList();
@@ -22,7 +22,10 @@ namespace CloseAll.Services
             {
                 if (filter.IsEligibleForTermination(proc))
                 {
-                    processManager.KillProcess(proc);
+                    Console.WriteLine($"Kill {proc.ProcessName}");
+                    
+                    if (!simulate)
+                        processManager.KillProcess(proc);
                 }
             });
         }
