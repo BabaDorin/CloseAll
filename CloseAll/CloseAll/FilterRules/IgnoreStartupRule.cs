@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace CloseAll.FilterRules
 {
-    internal class IgnoreStartupRule : IRule
+    internal class IgnoreStartupRule : IPassingRule
     {
         private readonly IEnumerable<string> startupProcesses;
 
@@ -12,9 +12,9 @@ namespace CloseAll.FilterRules
             startupProcesses = processManager.GetStartupProcessesNames() ?? Enumerable.Empty<string>();
         }
 
-        public bool IsEligible(Process process)
+        public bool IsPrivileged(Process process)
         {
-            return !startupProcesses
+            return startupProcesses
                 .Any(procName => procName.Equals(process.ProcessName, StringComparison.CurrentCultureIgnoreCase));
         }
     }

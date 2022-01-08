@@ -5,12 +5,12 @@ namespace CloseAll.Services
 {
     internal class FilterBuilder
     {
-        private List<IRule> rules;
+        private List<IPassingRule> rules;
         private List<string> exceptions;
 
         public FilterBuilder()
         {
-            rules = new List<IRule>();
+            rules = new List<IPassingRule>();
             exceptions = new List<string>();
         }
 

@@ -7,17 +7,17 @@ namespace CloseAll.Services
         public string ReadAll(string path)
         {
             if (!File.Exists(path))
-                throw new ArgumentException($"The file does not exist: {path}");
+                File.Create(path);
 
             using var sr = new StreamReader(path);
 
-            return sr.ReadToEnd();
+            return sr.ReadToEnd().Replace(@"\r", "");
         }
 
         public void Append(string path, string content)
         {
             if (!File.Exists(path))
-                throw new ArgumentException($"The file does not exist: {path}");
+                File.Create(path);
 
             using var sw = new StreamWriter(path, true);
             sw.WriteLine(content);

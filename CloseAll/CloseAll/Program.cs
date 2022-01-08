@@ -70,5 +70,7 @@ class Program
 
         new ProcessCleaner(filter, processManager)
             .Start();
+
+        Console.ReadKey();
     }
 }

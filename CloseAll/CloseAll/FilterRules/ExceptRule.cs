@@ -7,7 +7,7 @@ namespace CloseAll.FilterRules
     /// The process won't be terminated if it's name is within the exceptions list.
     /// The exceptions are passed via cmd arguments
     /// </summary>
-    internal class ExceptRule : IRule
+    internal class ExceptRule : IPassingRule
     {
         private readonly IEnumerable<string> exceptions;
 
@@ -16,9 +16,9 @@ namespace CloseAll.FilterRules
             this.exceptions = exceptions ?? Enumerable.Empty<string>();
         }
 
-        public bool IsEligible(Process process)
+        public bool IsPrivileged(Process process)
         {
-            return !exceptions
+            return exceptions
                 .Any(processName => processName.Equals(process.ProcessName, StringComparison.CurrentCultureIgnoreCase));
         }
     }

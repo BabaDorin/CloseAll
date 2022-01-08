@@ -20,7 +20,7 @@ namespace CloseAll.Services
         public IEnumerable<string> GetWhitelistedProcesses()
         {
             return this.fileManager.ReadAll(filePath)
-                .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                .Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }

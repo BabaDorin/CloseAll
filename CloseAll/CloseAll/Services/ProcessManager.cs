@@ -7,17 +7,35 @@ namespace CloseAll.Services
     {
         public IEnumerable<Process> GetRunningProcesses()
         {
-            throw new Exception();
+            var processes = Process.GetProcesses();
+
+            processes = processes.Where(proc => MightBeTerminated(proc)).ToArray();
+
+            return processes;
+        }
+
+        // TODO: Enrich selection | Some processes that should be terminated are not selected
+        private bool MightBeTerminated(Process proc)
+        {
+            return
+                HasWindow(proc) || proc.ProcessName == "explorer";
+        }
+
+        private bool HasWindow(Process proc)
+        {
+            return !String.IsNullOrEmpty(proc.MainWindowTitle) && 
+                proc.MainWindowTitle != Process.GetCurrentProcess().MainWindowTitle;
         }
         
+        // TODO 
         public IEnumerable<string> GetStartupProcessesNames()
         {
-            throw new NotImplementedException();
+            return Enumerable.Empty<string>();
         }
 
         public void KillProcess(Process proc)
         {
-            Console.WriteLine(proc.ProcessName);
+            Console.WriteLine($"Kill {proc.ProcessName}");
             // proc.Kill();
         }
     }

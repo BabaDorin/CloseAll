@@ -4,20 +4,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CloseAll.FilterRules
 {
-    internal class WhitelistRule : IRule
+    internal class WhitelistRule : IPassingRule
     {
-        private readonly IWhiteListManager whiteListManager;
+        private readonly List<string> whitelistedProcesses;
 
         public WhitelistRule(IWhiteListManager whiteListManager)
         {
-            this.whiteListManager = whiteListManager;
+            this.whitelistedProcesses = whiteListManager.GetWhitelistedProcesses()
+                .ToList();
         }
 
-        public bool IsEligible(Process process)
+        public bool IsPrivileged(Process process)
         {
-            var whitelistedProcesses = whiteListManager
-                .GetWhitelistedProcesses();
-
             if (whitelistedProcesses is null)
                 return false;
 
